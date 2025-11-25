@@ -3,8 +3,26 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
+const transporter = require("../others/nodemailer");
+const { JWT_SECRET } = process.env.JWT_SECRET;
 
-const JWT_SECRET = process.env.JWT_SECRET;
+
+// nodemailer sendMail setting up 
+const sendMail = async (email) => {
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Hello from Nodemailer",
+      text: "This is a test email using Gmail + Nodemailer + App Password.",
+    });
+
+    console.log("Email sent:", info);
+  } catch (err) {
+    console.error("Error sending email:", err);
+  }
+};
+// registering new user
 const userRegistration = async (req, res) => {
   try {
     const { fullName, username, email, password } = req.body;
@@ -25,6 +43,9 @@ const userRegistration = async (req, res) => {
         email,
         password: hashedPassword,
       });
+
+       sendMail(email);
+
       res.status(201).send({
         message: "user created successfully",
         fullName,
@@ -36,6 +57,7 @@ const userRegistration = async (req, res) => {
     console.error("registration failed", error);
   }
 };
+// logging in user 
 const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
