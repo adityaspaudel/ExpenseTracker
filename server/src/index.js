@@ -16,6 +16,9 @@ const http = require("http");
 const { Server } = require("socket.io");
 const server = http.createServer(app);
 
+// importing routes
+const userRoute = require("./routes/userRoute");
+
 // middlewares
 app.use(express.json());
 app.use(cors());
@@ -26,7 +29,9 @@ app.use(cookieParser());
 
 // connecting database
 dbConnect();
+
 // routing
+app.use(userRoute);
 
 // setting up socket
 const io = new Server(server, {
