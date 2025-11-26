@@ -1,74 +1,67 @@
 const express = require("express");
-const app = express();
-const dbConnect = require("./db/connection");
 const dotenv = require("dotenv");
 dotenv.config();
-
-// importing middlewares
-const cors = require("cors");
-const morgan = require("morgan");
-const helmet = require("helmet");
-const compression = require("compression");
-const cookieParser = require("cookie-parser");
-
-// importing socket objects
 const http = require("http");
 const { Server } = require("socket.io");
-const server = http.createServer(app);
 
-// importing routes
+const dbConnect = require("./db/connection");
 const userRoute = require("./routes/userRoute");
 
-// middlewares
-app.use(express.json());
-app.use(cors());
-app.use(morgan("dev"));
-app.use(helmet());
-app.use(compression());
-app.use(cookieParser());
+// Import all middlewares from one file
+const appMiddlewares = require("./middlewares/appMiddleware");
 
-// connecting database
+const app = express();
+const server = http.createServer(app);
+
+// ---- Apply global middlewares ----
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(appMiddlewares); // helmet, cors, xss-clean, mongo-sanitize, hpp, rate-limiter
+
+// ---- Connect to Database ----
 dbConnect();
 
-// routing
-app.use(userRoute);
+// ---- Routes ----
+app.use("/api/users", userRoute);
 
-// setting up socket
+// ---- Socket.io Setup ----
 const io = new Server(server, {
-  cors: { origin: "http://localhost:8000" },
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  credential: true,
+  cors: {
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
+  },
 });
-// socket connection creation
+
 io.on("connection", (socket) => {
-  console.log("socket connected", socket.id);
+  console.log("⚡ Socket connected:", socket.id);
+
   socket.on("join", (userId) => {
     socket.join(userId);
-    console.log(`user id ${userId} connected`);
+    console.log(`👤 User ${userId} joined room`);
   });
+
   socket.on("disconnect", () => {
-    console.log("socket disconnected", socket.id);
+    console.log("❌ Socket disconnected:", socket.id);
   });
 });
 
-// exceptional handling
+// ---- Global Error Handling ----
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err.stack);
+  res.status(500).json({ success: false, message: "Internal server error" });
+});
+
+// ---- Handle Uncaught Exceptions & Rejections ----
 process.on("uncaughtException", (err) => {
-  console.error("uncaught exception", err);
+  console.error("❗ Uncaught Exception:", err);
 });
 process.on("unhandledRejection", (err) => {
-  console.log("unhandled rejection", err);
-});
-app.use((req, res, err) => {
-  console.error(err);
+  console.error("❗ Unhandled Rejection:", err);
 });
 
-// application
+// ---- Start Server ----
 const PORT = process.env.PORT || 8000;
-
-try {
-  server.listen(PORT, () => {
-    console.log(`application is running on port ${PORT}`);
-  });
-} catch (error) {
-  console.error(error);
-}
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
