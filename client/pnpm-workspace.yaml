@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 ignoredBuiltDependencies:
+=======
+onlyBuiltDependencies:
+>>>>>>> 57eb19ddbfc303865e5b45c88f9bfbb004c653b4
   - sharp
   - unrs-resolver
