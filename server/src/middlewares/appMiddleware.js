@@ -22,7 +22,6 @@ const appMiddlewares = [
 	helmet(),
 	corsMiddleware,
 	xss(),
-	mongoSanitize(),
 	hpp(),
 	apiLimiter,
 ];
