@@ -5,8 +5,9 @@ const dotenv = require("dotenv");
 dotenv.config();
 const transporter = require("../others/nodemailer");
 
-EMAIL_USER = "adityaspaudel@gmail.com";
-EMAIL_PASS = "ivmf ilgt npdb ncvn";
+// EMAIL_USER = "adityaspaudel@gmail.com";
+// EMAIL_PASS = "ivmf ilgt npdb ncvn";
+
 // nodemailer sendMail setting up
 const sendMail = async (email) => {
 	try {

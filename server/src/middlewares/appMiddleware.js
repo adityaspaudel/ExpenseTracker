@@ -1,5 +1,5 @@
 const helmet = require("helmet");
-const xss = require("xss-clean");
+const { xss } = require("express-xss-sanitizer"); 
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const cors = require("cors");
@@ -17,7 +17,7 @@ const apiLimiter = rateLimit({
 // ---- CORS for Next.js ----
 const corsMiddleware = cors();
 
-// ---- Export all middlewares as array ----
+// ---- Middleware array ----
 const appMiddlewares = [
 	helmet(),
 	corsMiddleware,
