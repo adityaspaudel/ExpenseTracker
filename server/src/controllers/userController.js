@@ -26,8 +26,8 @@ const sendMail = async (email) => {
 // registering new user
 const userRegistration = async (req, res) => {
 	try {
-		const { fullName, username, email, password } = req.body;
-		if (!fullName || !username || !email || !password) {
+		const { fullName, username, email, password, role } = req.body;
+		if (!fullName || !username || !email || !password || !role) {
 			res.send({ message: "all fields are required" });
 			throw new Error("all fields are required");
 		}
@@ -45,6 +45,7 @@ const userRegistration = async (req, res) => {
 				username,
 				email,
 				password: hashedPassword,
+				role,
 			});
 
 			sendMail(email);
