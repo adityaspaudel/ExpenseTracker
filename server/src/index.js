@@ -15,7 +15,7 @@ const server = http.createServer(app);
 
 // ---- Apply global middlewares ----
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
 app.use(appMiddlewares); // helmet, cors, xss-clean, mongo-sanitize, hpp, rate-limiter
 
 // ---- Connect to Database ----

@@ -2,19 +2,20 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// MONGODB_ATLAS_URI =
-// 	"mongodb+srv://dbUser:dbUserPassword@cluster0.p9ldcdv.mongodb.net/?appName=Cluster0";
+// PORT=8000 
+// MONGODB_ATLAS_URI="mongodb+srv://adityaspaudel_db_user:adityaspaudel_db_user@cluster0.kigzppt.mongodb.net/expenseTracker" 
 
-// MONGODB_LOCAL_URI = "mongodb://127.0.0.1:27017/expenseTracker";
+
+const MONGODB_LOCAL_URI = "mongodb://localhost:27017/expenseTracker";
 const dbConnect = async () => {
 	try {
 		const isConnected = await mongoose.connect(
-			process.env.MONGODB_ATLAS_URI || process.env.MONGODB_LOCAL_URI
+			`${process.env.MONGODB_ATLAS_URI}`
 		);
 		if (!isConnected) throw new Error("mongodb error");
-		console.log(`connected to ${process.env.MONGODB_ATLAS_URI}`);
+		else console.log(`connected to ${process.env.MONGODB_ATLAS_URI}`);
 	} catch (error) {
-		console.error(error);
+		console.error("database connection error", error);
 	}
 };
 

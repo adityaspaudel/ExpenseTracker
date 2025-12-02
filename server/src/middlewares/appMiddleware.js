@@ -14,22 +14,14 @@ const apiLimiter = rateLimit({
 	legacyHeaders: false,
 });
 
-// ---- CORS ----
-const corsMiddleware = cors({
-	origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
-	credentials: true,
-	methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-});
+// ---- CORS for Next.js ----
+const corsMiddleware = cors();
 
 // ---- Middleware array ----
 const appMiddlewares = [
-	helmet({
-		contentSecurityPolicy: false,
-		crossOriginEmbedderPolicy: false,
-		crossOriginResourcePolicy: false,
-	}),
+	helmet(),
 	corsMiddleware,
-	xss(), 
+	xss(),
 	mongoSanitize(),
 	hpp(),
 	apiLimiter,
