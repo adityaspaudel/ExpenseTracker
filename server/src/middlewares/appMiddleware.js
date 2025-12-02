@@ -1,5 +1,6 @@
 const helmet = require("helmet");
-const { xss } = require("express-xss-sanitizer");
+const { xss } = require("express-xss-sanitizer"); 
+const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
