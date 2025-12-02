@@ -12,33 +12,34 @@ const UserRegister = () => {
 		password: "",
 		role: "user", // default role
 	});
+	const [apiMessage, setApiMessage] = useState(null);
 
 	return (
 		<div>
 			<h1>Sign Up</h1>
-
+			apiMessage: {JSON.stringify(apiMessage)}
 			<Formik
 				initialValues={formData}
-				onSubmit={async (values) => {
-					alert(JSON.stringify(values, null, 2));
-
+				onSubmit={async (values, { setSubmitting, resetForm }) => {
 					try {
-						const response = await axios(
-							`http://localhost:8000/user/userRegistration`,
-							{
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-									body: JSON.stringify(values),
-								},
-							}
+						const response = await axios.post(
+							"http://localhost:8000/user/userRegistration",
+							values,
+							{ headers: { "Content-Type": "application/json" } }
 						);
-						if (!response.ok)
-							throw new Error(`Server error,${response.data.message}`);
+
+						setApiMessage(response.data.message);
+						resetForm();
 					} catch (error) {
 						console.error(error);
+						if (error.response) {
+							setApiMessage(error.response.data.message);
+						} else {
+							setApiMessage("Something went wrong!");
+						}
 					} finally {
-						console.log(`process completed`);
+						setSubmitting(false);
+						console.log("Process completed");
 					}
 				}}
 			>
@@ -69,6 +70,7 @@ const UserRegister = () => {
 					</Form>
 				)}
 			</Formik>
+			{JSON.stringify(formData, 2, 2)}
 		</div>
 	);
 };

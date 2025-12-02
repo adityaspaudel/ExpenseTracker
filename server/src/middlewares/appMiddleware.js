@@ -2,27 +2,18 @@ const helmet = require("helmet");
 const { xss } = require("express-xss-sanitizer");
 const hpp = require("hpp");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
-
-// ---- Rate Limiter ----
-const apiLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 100,
-	message: "Too many requests, try again later",
-	standardHeaders: true,
-	legacyHeaders: false,
-});
+const express = require("express"); // 👈 import express
 
 // ---- CORS for Next.js ----
 const corsMiddleware = cors();
 
 // ---- Middleware array ----
 const appMiddlewares = [
+	express.json(), // 👈 Parse JSON bodies
 	helmet(),
 	corsMiddleware,
 	xss(),
 	hpp(),
-	apiLimiter,
 ];
 
 module.exports = appMiddlewares;

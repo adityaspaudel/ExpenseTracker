@@ -10,57 +10,71 @@ const transporter = require("../others/nodemailer");
 
 // nodemailer sendMail setting up
 const sendMail = async (email) => {
-	try {
-		const info = await transporter.sendMail({
-			from: process.env.EMAIL_USER,
-			to: email,
-			subject: "Hello from Nodemailer",
-			text: "This is a test email using Gmail + Nodemailer + App Password.",
-		});
-
-		console.log("Email sent:", info);
-	} catch (err) {
-		console.error("Error sending email:", err);
-	}
+  try {
+    const info = await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Hello from Nodemailer",
+      text: "This is a test email using Gmail + Nodemailer + App Password.",
+    });
+    console.log("✅ Email sent:", info.response);
+    return true;
+  } catch (err) {
+    console.error("⚠️ Error sending email:", err.message);
+    return false;
+  }
 };
+
 // registering new user
 const userRegistration = async (req, res) => {
-	try {
-		const { fullName, username, email, password, role } = req.body;
-		if (!fullName || !username || !email || !password || !role) {
-			res.send({ message: "all fields are required" });
-			throw new Error("all fields are required");
-		}
-		const findUserByUsername = await User.findOne({ username });
-		const findUserByEmail = await User.findOne({ email });
-		if (findUserByUsername || findUserByEmail) {
-			res.status(409).send({ message: "username or email already exists" });
-			throw new Error("username or email already exists");
-		} else {
-			const saltRounds = 10;
-			const hashedPassword = await bcrypt.hash(password, saltRounds);
+  try {
+    const { fullName, username, email, password, role } = req.body || {};
 
-			await User.create({
-				fullName,
-				username,
-				email,
-				password: hashedPassword,
-				role,
-			});
+    if (!fullName || !username || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-			sendMail(email);
+    const findUserByUsername = await User.findOne({ username });
+    const findUserByEmail = await User.findOne({ email });
 
-			res.status(201).send({
-				message: "user created successfully",
-				fullName,
-				username,
-				email,
-			});
-		}
-	} catch (error) {
-		console.error("registration failed", error);
-	}
+    if (findUserByUsername || findUserByEmail) {
+      return res
+        .status(409)
+        .json({ message: "Username or email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      fullName,
+      username,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    // Send email but don't crash registration if it fails
+    const emailSent = await sendMail(email);
+    if (!emailSent) {
+      console.warn(
+        `⚠️ User created but email could not be sent to ${email}`
+      );
+    }
+
+    res.status(201).json({
+      message: "User created successfully",
+      user: {
+        fullName: newUser.fullName,
+        username: newUser.username,
+        email: newUser.email,
+      },
+    });
+  } catch (error) {
+    console.error("🔥 Registration failed:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
+
 
 const userLogin = async (req, res) => {
 	try {
